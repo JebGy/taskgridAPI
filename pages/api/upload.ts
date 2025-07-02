@@ -14,29 +14,32 @@ if (!region || !accessKeyId || !secretAccessKey) {
 }
 
 const s3Client = new S3Client({
-  region,
+  region: process.env.NEXT_AWS_S3_REGION!,
   credentials: {
-    accessKeyId,
-    secretAccessKey,
+    accessKeyId: process.env.NEXT_AWS_S3_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.NEXT_AWS_S3_SECRET_ACCESS_KEY!,
   },
 });
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
-const bucketName = process.env.NEXT_AWS_S3_BUCKET_NAME;
+const bucketName = process.env.NEXT_AWS_S3_BUCKET_NAME!;
 
 if (!bucketName) {
   throw new Error("Falta la variable de entorno NEXT_AWS_S3_BUCKET_NAME");
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   // Configuración CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   // Manejar solicitud OPTIONS (preflight)
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
@@ -49,7 +52,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { file, fileName, contentType } = req.body;
 
     if (!file || !fileName || !contentType) {
-      return res.status(400).json({ error: "Faltan parámetros: file, fileName o contentType" });
+      return res
+        .status(400)
+        .json({ error: "Faltan parámetros: file, fileName o contentType" });
     }
 
     // Decodificar el archivo de base64
@@ -76,4 +81,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: mensaje });
   }
 }
-
